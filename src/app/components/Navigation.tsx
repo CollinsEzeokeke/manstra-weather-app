@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+// import { usePathname } from 'next/navigation';
 
 export default function Navigation() {
-  const pathname = usePathname();
+  // const pathname = usePathname();
   
   return (
     <nav className="bg-gradient-to-r from-gray-900 to-gray-800 text-rose-100 shadow-lg border-b border-rose-800/30">
