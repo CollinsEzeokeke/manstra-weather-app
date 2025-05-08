@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import WeatherChat from './components/WeatherChat';
 
 interface WeatherData {
   temperature: number;
@@ -200,24 +201,30 @@ export default function Home() {
     
     try {
       // Send the message to the AI insights endpoint
-      const response = await fetch('/api/ai-insights', {
+      const response = await fetch('/api/weather-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          location: weatherData.location,
-          conditions: weatherData.conditions,
-          temperature: weatherData.temperature,
           message: userMessage,
+          weatherData: {
+            location: weatherData.location,
+            conditions: weatherData.conditions,
+            temperature: weatherData.temperature,
+            humidity: weatherData.humidity,
+            windSpeed: weatherData.windSpeed,
+            precipitation: weatherData.precipitation,
+            forecast: weatherData.forecast,
+          },
         }),
       });
       
       const data = await response.json();
       
-      if (response.ok && data.agentResponse) {
+      if (response.ok && data.response) {
         // Add the AI response to the chat
-        setChatMessages(prev => [...prev, { role: 'assistant', content: data.agentResponse }]);
+        setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
       } else {
         // If there was an error, add a fallback message
         setChatMessages(prev => [...prev, { 
@@ -243,21 +250,21 @@ export default function Home() {
     
     const condition = weatherData.conditions.toLowerCase();
     if (condition.includes('clear') || condition.includes('mainly clear')) {
-      return 'bg-gradient-to-b from-blue-400 to-blue-600';
+      return 'bg-gradient-to-b from-gray-800 to-gray-900 border border-rose-800/20';
     } else if (condition.includes('cloud') || condition.includes('overcast')) {
-      return 'bg-gradient-to-b from-gray-300 to-gray-500';
+      return 'bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-700';
     } else if (condition.includes('rain') || condition.includes('drizzle')) {
-      return 'bg-gradient-to-b from-blue-700 to-gray-800';
+      return 'bg-gradient-to-b from-gray-900 to-gray-800 border border-blue-900/30';
     } else if (condition.includes('snow')) {
-      return 'bg-gradient-to-b from-blue-100 to-gray-300';
+      return 'bg-gradient-to-b from-gray-900 to-gray-800 border border-blue-700/20';
     } else if (condition.includes('fog')) {
-      return 'bg-gradient-to-b from-gray-400 to-gray-600';
+      return 'bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-600';
     } else if (condition.includes('thunder')) {
-      return 'bg-gradient-to-b from-gray-700 to-purple-900';
+      return 'bg-gradient-to-b from-gray-900 to-gray-800 border border-purple-900/30';
     }
     
     // Default
-    return 'bg-gradient-to-b from-blue-300 to-blue-500';
+    return 'bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-700';
   };
 
   // Display appropriate weather icon
@@ -294,14 +301,14 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-indigo-900 py-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-950 py-12 px-4 relative overflow-hidden">
       {/* Animated background dots - FIXED */}
       <div className="absolute inset-0 overflow-hidden z-0">
         <div className="absolute inset-0">
           {particles.map((particle) => (
             <div
               key={particle.id}
-              className="absolute rounded-full bg-white/10"
+              className="absolute rounded-full bg-rose-300/10"
               style={{
                 width: `${particle.width}px`,
                 height: `${particle.height}px`,
@@ -317,21 +324,21 @@ export default function Home() {
       <main className="max-w-2xl mx-auto relative z-10">
         <div className="flex items-center justify-center gap-3 mb-8">
           <div className="relative">
-            <div className={`h-12 w-12 rounded-full border-2 border-blue-300 flex items-center justify-center 
+            <div className={`h-12 w-12 rounded-full border-2 border-rose-300 flex items-center justify-center 
               ${animateAI ? 'animate-pulse' : ''}`}>
-              <div className="text-blue-300 font-bold text-xl">AI</div>
+              <div className="text-rose-300 font-bold text-xl">AI</div>
             </div>
             {animateAI && (
-              <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-green-400 animate-ping"></div>
+              <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-rose-400 animate-ping"></div>
             )}
           </div>
           <h1 className="text-4xl font-bold text-center text-white">
-            WeatherAI <span className="text-blue-300">Insights</span>
+            Weather<span className="text-rose-300">AI</span>
           </h1>
         </div>
         
-        <div className={`backdrop-blur-lg bg-white/10 rounded-xl overflow-hidden shadow-2xl 
-          transform transition-all duration-500 border border-white/20
+        <div className={`backdrop-blur-lg bg-gray-800/30 rounded-xl overflow-hidden shadow-2xl 
+          transform transition-all duration-500 border border-gray-700
           ${loading ? 'scale-98' : 'scale-100'}`}>
           <div className="p-6">
             <form onSubmit={handleSubmit} className="mb-6">
@@ -352,12 +359,12 @@ export default function Home() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Enter city name..."
-                    className="flex-1 px-10 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-gray-300"
+                    className="flex-1 px-10 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-white placeholder-gray-400"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 font-medium transition-all"
+                    className="px-5 py-3 bg-gradient-to-r from-rose-500 to-rose-400 text-white rounded-lg hover:from-rose-600 hover:to-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-70 font-medium transition-all"
                   >
                     {loading ? (
                       <div className="flex items-center gap-2">
@@ -378,7 +385,7 @@ export default function Home() {
             {loading && (
               <div className="text-center py-8">
                 <div className="inline-block animate-bounce mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
                     <path d="M8 16a4 4 0 0 0 8 0 3 3 0 0 0-8-5"></path>
                     <path d="M7 16a4 4 0 0 1-2-3 3 3 0 0 1 4-4"></path>
                     <line x1="8" y1="9" x2="8" y2="9"></line>
@@ -391,7 +398,7 @@ export default function Home() {
                     {[0, 1, 2].map((i) => (
                       <div 
                         key={i} 
-                        className="h-2 w-2 bg-blue-300 rounded-full" 
+                        className="h-2 w-2 bg-rose-300 rounded-full" 
                         style={{ 
                           animation: `bounce 1.4s infinite ease-in-out both`,
                           animationDelay: `${i * 0.16}s`
@@ -440,7 +447,7 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  <div className="bg-white/20 backdrop-blur-md rounded-lg p-6">
+                  <div className="bg-gray-800/30 backdrop-blur-md rounded-lg p-6 border border-gray-700/50">
                     <div className="flex justify-center mb-6">
                       <div className="text-center">
                         <span className="text-5xl font-bold text-white">{Math.round(weatherData.temperature)}°</span>
@@ -449,30 +456,30 @@ export default function Home() {
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                      <div className="bg-white/10 p-4 rounded-lg">
+                      <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
                         <p className="text-white/70 text-sm">Humidity</p>
                         <div className="flex items-center mt-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 mr-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300 mr-2">
                             <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
                           </svg>
                           <p className="text-xl font-medium text-white">{weatherData.humidity}%</p>
                         </div>
                       </div>
                       
-                      <div className="bg-white/10 p-4 rounded-lg">
+                      <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
                         <p className="text-white/70 text-sm">Wind Speed</p>
                         <div className="flex items-center mt-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 mr-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300 mr-2">
                             <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
                           </svg>
                           <p className="text-xl font-medium text-white">{weatherData.windSpeed} km/h</p>
                         </div>
                       </div>
                       
-                      <div className="bg-white/10 p-4 rounded-lg">
+                      <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
                         <p className="text-white/70 text-sm">Wind Gust</p>
                         <div className="flex items-center mt-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 mr-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300 mr-2">
                             <line x1="2" y1="12" x2="22" y2="12"></line>
                             <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-6 3.3 4 4 0 0 1-1.7-3 4 4 0 0 1 4.5-4 4 4 0 0 1 1.7.7 4 4 0 0 1 .3.3 4 4 0 0 1 1.4 3"></path>
                           </svg>
@@ -480,30 +487,30 @@ export default function Home() {
                         </div>
                       </div>
                       
-                      <div className="bg-white/10 p-4 rounded-lg">
+                      <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
                         <p className="text-white/70 text-sm">Precipitation</p>
                         <div className="flex items-center mt-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 mr-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300 mr-2">
                             <path d="M12 22a8 8 0 0 1-8-8c0-3.5 2.5-6 3-6.5 1-1 2-3.5 2-5.5.5 1 2 2 3 2s2.5-1 3-2c0 2-1 4.5-2 5.5-.5.5-3 3-3 6.5a8 8 0 0 1-8 8Z"></path>
                           </svg>
                           <p className="text-xl font-medium text-white">{weatherData.precipitation} mm</p>
                         </div>
                       </div>
                       
-                      <div className="bg-white/10 p-4 rounded-lg">
+                      <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
                         <p className="text-white/70 text-sm">Cloud Cover</p>
                         <div className="flex items-center mt-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 mr-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300 mr-2">
                             <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                           </svg>
                           <p className="text-xl font-medium text-white">{weatherData.cloudCover}%</p>
                         </div>
                       </div>
                       
-                      <div className="bg-white/10 p-4 rounded-lg">
+                      <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
                         <p className="text-white/70 text-sm">Pressure</p>
                         <div className="flex items-center mt-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 mr-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300 mr-2">
                             <path d="M12 2v2"></path>
                             <path d="M12 8v2"></path>
                             <path d="M12 14v2"></path>
@@ -528,7 +535,7 @@ export default function Home() {
                     
                     {/* Forecast Section */}
                     {weatherData.forecast && (
-                      <div className="mt-6 bg-white/5 p-4 rounded-lg">
+                      <div className="mt-6 bg-gray-800/40 p-4 rounded-lg border border-gray-700/50">
                         <h3 className="text-lg font-semibold text-white mb-3">7-Day Forecast</h3>
                         <div className="overflow-x-auto">
                           <div className="flex min-w-max space-x-4">
@@ -539,14 +546,14 @@ export default function Home() {
                                 day: 'numeric'
                               });
                               return (
-                                <div key={index} className="flex-shrink-0 w-24 bg-white/10 rounded-lg p-3 text-center">
+                                <div key={index} className="flex-shrink-0 w-24 bg-gray-700/40 rounded-lg p-3 text-center border border-gray-600/30">
                                   <p className="text-white/80 text-sm font-medium">{index === 0 ? 'Today' : formattedDate}</p>
                                   <div className="my-2">
                                     {getWeatherIconForCondition(weatherData.forecast!.conditions[index], 'small')}
                                   </div>
                                   <p className="text-xs text-white/70 h-8 overflow-hidden">{weatherData.forecast!.conditions[index].split(' ').slice(0, 2).join(' ')}</p>
                                   <div className="mt-2 flex justify-between items-center px-1">
-                                    <span className="text-blue-300 text-xs">{Math.round(weatherData.forecast!.minTemps[index])}°</span>
+                                    <span className="text-rose-300 text-xs">{Math.round(weatherData.forecast!.minTemps[index])}°</span>
                                     <span className="text-white text-sm font-medium">{Math.round(weatherData.forecast!.maxTemps[index])}°</span>
                                   </div>
                                 </div>
@@ -559,9 +566,9 @@ export default function Home() {
                     
                     {/* Simple AI Insight (will be replaced by real AI insights) */}
                     {!aiInsights && !insightsLoading && (
-                      <div className="mt-6 bg-white/5 p-3 rounded-lg">
+                      <div className="mt-6 bg-gray-800/40 p-3 rounded-lg border border-gray-700/50">
                         <p className="text-white/90 text-center">
-                          <span className="text-blue-300 font-semibold">AI Insight:</span> {' '}
+                          <span className="text-rose-300 font-semibold">AI Insight:</span> {' '}
                           {weatherData.conditions.includes('Clear') 
                             ? 'Perfect weather for outdoor activities! Make sure to stay hydrated.'
                             : weatherData.conditions.includes('Cloud') 
@@ -577,9 +584,9 @@ export default function Home() {
                     
                     {/* AI Insights Loading Indicator */}
                     {insightsLoading && (
-                      <div className="mt-6 bg-white/5 p-5 rounded-lg">
+                      <div className="mt-6 bg-gray-800/40 p-5 rounded-lg border border-gray-700/50">
                         <div className="flex justify-center items-center">
-                          <svg className="animate-spin h-5 w-5 text-blue-300 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-5 w-5 text-rose-300 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
@@ -592,17 +599,17 @@ export default function Home() {
                 
                 {/* AI Insights Display */}
                 {aiInsights && (
-                  <div className={`bg-indigo-900/60 backdrop-blur-lg p-6 border-t border-white/10 transition-all duration-500 
+                  <div className={`bg-gray-900/60 backdrop-blur-lg p-6 border-t border-gray-700 transition-all duration-500 
                     ${aiInsights ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0'}`}>
                     
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-white mb-3 flex items-center">
-                        <svg className="mr-2 h-5 w-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <svg className="mr-2 h-5 w-5 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         AI Weather Insights
                       </h3>
-                      <div className="bg-white/10 p-4 rounded-lg">
+                      <div className="bg-gray-800/30 p-4 rounded-lg border border-gray-700/50">
                         <p className="text-white/90">{aiInsights.insights.description}</p>
                       </div>
                     </div>
@@ -610,15 +617,15 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                       <div>
                         <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-                          <svg className="mr-2 h-5 w-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <svg className="mr-2 h-5 w-5 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>
                           Health Tips
                         </h4>
                         <ul className="space-y-2">
                           {aiInsights.insights.healthTips.map((tip, index) => (
-                            <li key={index} className="bg-white/10 p-3 rounded-lg flex items-start">
-                              <span className="text-blue-300 mr-2">•</span>
+                            <li key={index} className="bg-gray-800/30 p-3 rounded-lg flex items-start border border-gray-700/50">
+                              <span className="text-rose-300 mr-2">•</span>
                               <span className="text-white/90">{tip}</span>
                             </li>
                           ))}
@@ -627,15 +634,15 @@ export default function Home() {
                       
                       <div>
                         <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-                          <svg className="mr-2 h-5 w-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <svg className="mr-2 h-5 w-5 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                           </svg>
                           Fashion Advice
                         </h4>
                         <ul className="space-y-2">
                           {aiInsights.insights.fashionAdvice.map((advice, index) => (
-                            <li key={index} className="bg-white/10 p-3 rounded-lg flex items-start">
-                              <span className="text-blue-300 mr-2">•</span>
+                            <li key={index} className="bg-gray-800/30 p-3 rounded-lg flex items-start border border-gray-700/50">
+                              <span className="text-rose-300 mr-2">•</span>
                               <span className="text-white/90">{advice}</span>
                             </li>
                           ))}
@@ -645,14 +652,14 @@ export default function Home() {
                     
                     <div>
                       <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-                        <svg className="mr-2 h-5 w-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <svg className="mr-2 h-5 w-5 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         Recommended Activities
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {aiInsights.recommendedActivities.map((activity, index) => (
-                          <div key={index} className="bg-white/10 p-4 rounded-lg">
+                          <div key={index} className="bg-gray-800/30 p-4 rounded-lg border border-gray-700/50">
                             <p className="text-white/90 text-center">{activity}</p>
                           </div>
                         ))}
@@ -663,94 +670,39 @@ export default function Home() {
                     <div className="mt-8 flex justify-center">
                       <button
                         onClick={() => setShowChat(prev => !prev)}
-                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 font-medium transition-all flex items-center gap-2"
+                        className="px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-400 text-white rounded-lg hover:from-rose-600 hover:to-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-70 font-medium transition-all flex items-center gap-2"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
                         {showChat ? 'Hide Chat' : 'Chat with Weather AI'}
                       </button>
+                      
+                      <a
+                        href={`/chat?location=${encodeURIComponent(weatherData.location)}`}
+                        className="ml-4 px-6 py-3 bg-gray-800 text-rose-300 border border-rose-500/30 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 font-medium transition-all flex items-center gap-2"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                          <polyline points="15 3 21 3 21 9"></polyline>
+                          <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                        Full Chat Page
+                      </a>
                     </div>
                     
                     {/* Chat Interface */}
                     {showChat && (
-                      <div className="mt-6 bg-black/20 rounded-lg p-4 transition-all duration-300">
+                      <div className="mt-6 bg-gray-900/60 rounded-lg p-4 transition-all duration-300 border border-gray-700">
                         <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                          <svg className="mr-2 h-5 w-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <svg className="mr-2 h-5 w-5 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                           </svg>
                           Chat with Weather AI
                         </h3>
                         
-                        {/* Chat Messages */}
-                        <div className="bg-white/5 rounded-lg p-3 mb-3 h-64 overflow-y-auto">
-                          {chatMessages.length === 0 ? (
-                            <div className="text-center text-white/60 py-10">
-                              <p>Ask anything about the weather in {weatherData.location}!</p>
-                              <p className="text-sm mt-2">
-                                Examples: &quot;What should I wear today?&quot;, &quot;Is it a good day for hiking?&quot;, 
-                                &quot;When will the weather change?&quot;, &quot;Should I bring an umbrella?&quot;
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="space-y-3">
-                              {chatMessages.map((msg, index) => (
-                                <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                  <div 
-                                    className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                                      msg.role === 'user' 
-                                        ? 'bg-blue-600 text-white' 
-                                        : 'bg-white/10 text-white'
-                                    }`}
-                                  >
-                                    {msg.content}
-                                  </div>
-                                </div>
-                              ))}
-                              {chatLoading && (
-                                <div className="flex justify-start">
-                                  <div className="bg-white/10 text-white rounded-lg px-4 py-2 flex items-center">
-                                    <div className="flex space-x-1">
-                                      {[0, 1, 2].map((i) => (
-                                        <div 
-                                          key={i} 
-                                          className="h-2 w-2 bg-blue-300 rounded-full" 
-                                          style={{ 
-                                            animation: `bounce 1.4s infinite ease-in-out both`,
-                                            animationDelay: `${i * 0.16}s`
-                                          }}
-                                        />
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                              <div ref={chatEndRef} />
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Chat Input */}
-                        <form onSubmit={handleSendMessage} className="flex gap-2">
-                          <input
-                            type="text"
-                            value={chatInput}
-                            onChange={(e) => setChatInput(e.target.value)}
-                            placeholder="Ask me about the weather..."
-                            className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/60"
-                            disabled={chatLoading}
-                          />
-                          <button
-                            type="submit"
-                            disabled={chatLoading || !chatInput.trim()}
-                            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="22" y1="2" x2="11" y2="13"></line>
-                              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                            </svg>
-                          </button>
-                        </form>
+                        {/* Replace the custom chat implementation with the WeatherChat component */}
+                        <WeatherChat weatherData={weatherData} />
                       </div>
                     )}
                   </div>
@@ -760,7 +712,7 @@ export default function Home() {
             
             {!weatherData && !loading && !error && (
               <div className="py-8 text-center">
-                <div className="inline-block mb-4 text-blue-300 opacity-80">
+                <div className="inline-block mb-4 text-rose-300 opacity-80">
                   <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                   </svg>
@@ -771,25 +723,25 @@ export default function Home() {
                 <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm">
                   <button 
                     onClick={() => setLocation('London')}
-                    className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 rounded-full transition"
+                    className="px-3 py-1 bg-gray-700/40 hover:bg-gray-600/40 text-white/80 rounded-full border border-gray-600/30 transition"
                   >
                     London
                   </button>
                   <button 
                     onClick={() => setLocation('New York')}
-                    className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 rounded-full transition"
+                    className="px-3 py-1 bg-gray-700/40 hover:bg-gray-600/40 text-white/80 rounded-full border border-gray-600/30 transition"
                   >
                     New York
                   </button>
                   <button 
                     onClick={() => setLocation('Tokyo')}
-                    className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 rounded-full transition"
+                    className="px-3 py-1 bg-gray-700/40 hover:bg-gray-600/40 text-white/80 rounded-full border border-gray-600/30 transition"
                   >
                     Tokyo
                   </button>
                   <button 
                     onClick={() => setLocation('Sydney')}
-                    className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 rounded-full transition"
+                    className="px-3 py-1 bg-gray-700/40 hover:bg-gray-600/40 text-white/80 rounded-full border border-gray-600/30 transition"
                   >
                     Sydney
                   </button>
@@ -798,7 +750,7 @@ export default function Home() {
             )}
           </div>
           
-          <div className="px-6 py-3 bg-black/20 border-t border-white/10">
+          <div className="px-6 py-3 bg-gray-900/40 border-t border-gray-700/50">
             <p className="text-center text-white/50 text-sm">
               Powered by AI and open weather data • Updated just now
             </p>

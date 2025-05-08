@@ -7,20 +7,20 @@ export default function Navigation() {
   const pathname = usePathname();
   
   return (
-    <nav className="bg-blue-600 text-white shadow-md">
-      <div className="container mx-auto px-6 py-3">
+    <nav className="bg-gradient-to-r from-gray-900 to-gray-800 text-rose-100 shadow-lg border-b border-rose-800/30">
+      <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="text-xl font-semibold">
+          <div className="text-xl font-semibold text-rose-300">
             Manstra Weather
           </div>
           
           <div className="flex space-x-4">
             <Link 
               href="/" 
-              className={`px-3 py-2 rounded-md ${
+              className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 pathname === '/' 
-                  ? 'bg-blue-800 font-medium' 
-                  : 'hover:bg-blue-700'
+                  ? 'bg-rose-900/70 text-rose-200 font-medium shadow-inner' 
+                  : 'hover:bg-gray-800 hover:text-rose-300'
               }`}
             >
               Weather
@@ -28,10 +28,10 @@ export default function Navigation() {
             
             <Link 
               href="/chat" 
-              className={`px-3 py-2 rounded-md ${
+              className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 pathname === '/chat' 
-                  ? 'bg-blue-800 font-medium' 
-                  : 'hover:bg-blue-700'
+                  ? 'bg-rose-900/70 text-rose-200 font-medium shadow-inner' 
+                  : 'hover:bg-gray-800 hover:text-rose-300'
               }`}
             >
               Chat

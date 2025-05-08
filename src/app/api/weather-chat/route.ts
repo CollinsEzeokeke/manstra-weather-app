@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 // Import the agent directly
+import 'server-only';
 import { geminiWeatherChatAgent } from '@/mastra/agents';
 
-// Define thread storage for conversation memory
-const activeThreads: Record<string, { messages: { role: string, content: string }[] }> = {};
+interface WeatherDataInput {
+  location: string;
+  conditions: string;
+  temperature: number;
+  humidity?: number;
+  windSpeed?: number;
+  precipitation?: number;
+  forecast?: {
+    dates: string[];
+    maxTemps: number[];
+    minTemps: number[];
+    precipitation: number[];
+    conditions: string[];
+  };
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, threadId } = await request.json();
+    const { message, threadId, weatherData } = await request.json();
     
     if (!message) {
       return NextResponse.json(
@@ -17,20 +31,49 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Received chat message:', message, 'threadId:', threadId || 'none');
+    console.log('Weather data available:', weatherData ? 'yes' : 'no');
 
-    let currentThreadId = threadId || `thread-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-    
+    // Generate a response using the Gemini agent directly
     try {
-      // Generate a response using the Gemini agent directly
-      const response = await geminiWeatherChatAgent.generate(message, {
-        threadId: currentThreadId
-      });
+      // Enhance prompt with weather data if available
+      let enhancedMessage = message;
       
-      console.log('Generated response from Gemini agent, thread:', currentThreadId);
+      if (weatherData) {
+        const weatherDataInfo = `
+          Current weather in ${weatherData.location}:
+          - Conditions: ${weatherData.conditions}
+          - Temperature: ${weatherData.temperature}°C
+          ${weatherData.humidity ? `- Humidity: ${weatherData.humidity}%` : ''}
+          ${weatherData.windSpeed ? `- Wind Speed: ${weatherData.windSpeed} km/h` : ''}
+          ${weatherData.precipitation ? `- Precipitation: ${weatherData.precipitation} mm` : ''}
+          
+          ${weatherData.forecast ? `Forecast for the coming days:
+            ${weatherData.forecast.dates.map((date: string, i: number) => 
+              `- ${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}: 
+                ${weatherData.forecast!.conditions[i]}, 
+                ${Math.round(weatherData.forecast!.minTemps[i])}°-${Math.round(weatherData.forecast!.maxTemps[i])}°`
+            ).join('\n')}
+          ` : ''}
+        `;
+        
+        enhancedMessage = `
+          I'm looking at the weather in ${weatherData.location}. Here's the current data:
+          
+          ${weatherDataInfo}
+          
+          Based on this actual weather data, please answer my question: ${message}
+          
+          Be specific to this location and these weather conditions in your response.
+        `;
+      }
+      
+      const response = await geminiWeatherChatAgent.generate(enhancedMessage);
+      
+      console.log('Generated response from Gemini agent');
       
       return NextResponse.json({
         response: response.text,
-        threadId: currentThreadId
+        // We don't need to track threadId separately as it's handled by the memory system
       });
     } catch (agentError) {
       console.error('Error with Gemini agent:', agentError);
