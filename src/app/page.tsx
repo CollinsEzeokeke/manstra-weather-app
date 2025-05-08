@@ -78,7 +78,7 @@ export default function Home() {
   
   // Chat functionality
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState('');
+  // const [chatInput, setChatInput] = useState('');
   // const [chatLoading, setChatLoading] = useState(false);
   const [showChat, setShowChat] = useState(false);
   

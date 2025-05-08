@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import WeatherChat from '../components/WeatherChat';
 // import Head from 'next/head';
@@ -31,7 +31,7 @@ interface WeatherData {
   };
 }
 
-export default function ChatPage() {
+function ChatContent() {
   const searchParams = useSearchParams();
   const locationParam = searchParams.get('location');
   
@@ -131,5 +131,13 @@ export default function ChatPage() {
         </footer>
       </div>
     </main>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+      <ChatContent />
+    </Suspense>
   );
 } 
