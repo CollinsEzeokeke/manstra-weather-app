@@ -10,12 +10,12 @@ export default function Navigation() {
     <nav className="bg-gradient-to-r from-gray-900 to-gray-800 text-rose-100 shadow-lg border-b border-rose-800/30">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="text-xl font-semibold text-rose-300">
+          <Link href="/" className="text-xl font-semibold text-rose-300">
             Manstra Weather
-          </div>
+          </Link>
           
           <div className="flex space-x-4">
-            <Link 
+            {/* <Link 
               href="/" 
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 pathname === '/' 
@@ -24,9 +24,9 @@ export default function Navigation() {
               }`}
             >
               Weather
-            </Link>
+            </Link> */}
             
-            <Link 
+            {/* <Link 
               href="/chat" 
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 pathname === '/chat' 
@@ -35,7 +35,7 @@ export default function Navigation() {
               }`}
             >
               Chat
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

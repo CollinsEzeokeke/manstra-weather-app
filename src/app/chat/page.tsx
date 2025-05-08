@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import WeatherChat from '../components/WeatherChat';
-import Head from 'next/head';
+// import Head from 'next/head';
 
 interface WeatherData {
   temperature: number;

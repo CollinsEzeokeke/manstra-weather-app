@@ -79,7 +79,7 @@ export default function Home() {
   // Chat functionality
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
-  const [chatLoading, setChatLoading] = useState(false);
+  // const [chatLoading, setChatLoading] = useState(false);
   const [showChat, setShowChat] = useState(false);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -188,61 +188,61 @@ export default function Home() {
   };
   
   // Handle sending a chat message to the AI
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim() || !weatherData) return;
+  // const handleSendMessage = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!chatInput.trim() || !weatherData) return;
     
-    const userMessage = chatInput.trim();
-    setChatInput('');
-    setChatLoading(true);
+  //   const userMessage = chatInput.trim();
+  //   setChatInput('');
+  //   // setChatLoading(true);
     
-    // Add the user message to the chat
-    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+  //   // Add the user message to the chat
+  //   setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     
-    try {
-      // Send the message to the AI insights endpoint
-      const response = await fetch('/api/weather-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          weatherData: {
-            location: weatherData.location,
-            conditions: weatherData.conditions,
-            temperature: weatherData.temperature,
-            humidity: weatherData.humidity,
-            windSpeed: weatherData.windSpeed,
-            precipitation: weatherData.precipitation,
-            forecast: weatherData.forecast,
-          },
-        }),
-      });
+  //   try {
+  //     // Send the message to the AI insights endpoint
+  //     const response = await fetch('/api/weather-chat', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         message: userMessage,
+  //         weatherData: {
+  //           location: weatherData.location,
+  //           conditions: weatherData.conditions,
+  //           temperature: weatherData.temperature,
+  //           humidity: weatherData.humidity,
+  //           windSpeed: weatherData.windSpeed,
+  //           precipitation: weatherData.precipitation,
+  //           forecast: weatherData.forecast,
+  //         },
+  //       }),
+  //     });
       
-      const data = await response.json();
+  //     const data = await response.json();
       
-      if (response.ok && data.response) {
-        // Add the AI response to the chat
-        setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
-      } else {
-        // If there was an error, add a fallback message
-        setChatMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: "I'm sorry, I couldn't process your request. Could you try asking something else about the weather?" 
-        }]);
-      }
-    } catch (error) {
-      console.error('Error in chat:', error);
-      // Add error message to chat
-      setChatMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: "I'm sorry, there was an error processing your message. Please try again." 
-      }]);
-    } finally {
-      setChatLoading(false);
-    }
-  };
+  //     if (response.ok && data.response) {
+  //       // Add the AI response to the chat
+  //       setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+  //     } else {
+  //       // If there was an error, add a fallback message
+  //       setChatMessages(prev => [...prev, { 
+  //         role: 'assistant', 
+  //         content: "I'm sorry, I couldn't process your request. Could you try asking something else about the weather?" 
+  //       }]);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error in chat:', error);
+  //     // Add error message to chat
+  //     setChatMessages(prev => [...prev, { 
+  //       role: 'assistant', 
+  //       content: "I'm sorry, there was an error processing your message. Please try again." 
+  //     }]);
+  //   } finally {
+  //     // setChatLoading(false);
+  //   }
+  // };
 
   // Function to determine weather background class
   const getWeatherBackground = () => {

@@ -3,21 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import 'server-only';
 import { geminiWeatherChatAgent } from '@/mastra/agents';
 
-interface WeatherDataInput {
-  location: string;
-  conditions: string;
-  temperature: number;
-  humidity?: number;
-  windSpeed?: number;
-  precipitation?: number;
-  forecast?: {
-    dates: string[];
-    maxTemps: number[];
-    minTemps: number[];
-    precipitation: number[];
-    conditions: string[];
-  };
-}
+// interface WeatherDataInput {
+//   location: string;
+//   conditions: string;
+//   temperature: number;
+//   humidity?: number;
+//   windSpeed?: number;
+//   precipitation?: number;
+//   forecast?: {
+//     dates: string[];
+//     maxTemps: number[];
+//     minTemps: number[];
+//     precipitation: number[];
+//     conditions: string[];
+//   };
+// }
 
 export async function POST(request: NextRequest) {
   try {
