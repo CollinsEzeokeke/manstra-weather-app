@@ -5,6 +5,8 @@ interface GeocodingResponse {
     latitude: number;
     longitude: number;
     name: string;
+    country: string;
+    timezone: string;
   }[];
 }
 
@@ -14,9 +16,26 @@ interface WeatherResponse {
     temperature_2m: number;
     apparent_temperature: number;
     relative_humidity_2m: number;
+    precipitation: number;
+    rain: number;
+    showers: number;
+    snowfall: number;
     wind_speed_10m: number;
+    wind_direction_10m: number;
     wind_gusts_10m: number;
     weather_code: number;
+    pressure_msl: number;
+    surface_pressure: number;
+    cloud_cover: number;
+    visibility: number;
+    is_day: number;
+  };
+  daily?: {
+    time: string[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    precipitation_sum: number[];
+    weather_code: number[];
   };
 }
 
@@ -51,21 +70,40 @@ const getWeather = async (location: string) => {
     throw new Error(`Location '${location}' not found`);
   }
 
-  const { latitude, longitude, name } = geocodingData.results[0];
+  const { latitude, longitude, name, country, timezone } = geocodingData.results[0];
 
-  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,weather_code`;
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,rain,showers,snowfall,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code,pressure_msl,surface_pressure,cloud_cover,visibility,is_day&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=${timezone}`;
 
   const response = await fetch(weatherUrl);
   const data = (await response.json()) as WeatherResponse;
+
+  // Format the full location name
+  const formattedLocation = country ? `${name}, ${country}` : name;
 
   return {
     temperature: data.current.temperature_2m,
     feelsLike: data.current.apparent_temperature,
     humidity: data.current.relative_humidity_2m,
+    precipitation: data.current.precipitation,
+    rain: data.current.rain,
+    snow: data.current.snowfall,
     windSpeed: data.current.wind_speed_10m,
+    windDirection: data.current.wind_direction_10m,
     windGust: data.current.wind_gusts_10m,
+    pressure: data.current.pressure_msl,
+    cloudCover: data.current.cloud_cover,
+    visibility: data.current.visibility,
+    isDay: Boolean(data.current.is_day),
     conditions: getWeatherCondition(data.current.weather_code),
-    location: name,
+    location: formattedLocation,
+    forecast: data.daily ? {
+      dates: data.daily.time,
+      maxTemps: data.daily.temperature_2m_max,
+      minTemps: data.daily.temperature_2m_min,
+      precipitation: data.daily.precipitation_sum,
+      conditions: data.daily.weather_code.map(getWeatherCondition)
+    } : undefined,
+    timezone
   };
 };
 
