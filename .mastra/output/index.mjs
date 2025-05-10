@@ -22,6 +22,12 @@ import { z } from 'zod';
 import { isVercelTool } from '@mastra/core/tools';
 import { ReadableStream as ReadableStream$1 } from 'node:stream/web';
 
+const getDatabaseUrl$1 = (dbName) => {
+  if (process.env.DATABASE_URL) {
+    return `${process.env.DATABASE_URL}?prefix=${dbName}`;
+  }
+  return `file:../${dbName}.db`;
+};
 const weatherAgent = new Agent({
   name: "Weather Agent",
   instructions: `
@@ -48,8 +54,7 @@ const weatherAgent = new Agent({
   tools: { weatherTool },
   memory: new Memory({
     storage: new LibSQLStore({
-      url: "file:../weather.db"
-      // path is relative to the .mastra/output directory
+      url: getDatabaseUrl$1("weather")
     }),
     options: {
       lastMessages: 10,
@@ -98,7 +103,7 @@ const geminiWeatherChatAgent = new Agent({
   model: google("gemini-1.5-flash"),
   memory: new Memory({
     storage: new LibSQLStore({
-      url: "file:../gemini-weather-chat.db"
+      url: getDatabaseUrl$1("gemini-weather-chat")
     }),
     options: {
       lastMessages: 10,
@@ -110,13 +115,19 @@ const geminiWeatherChatAgent = new Agent({
   })
 });
 
+const getDatabaseUrl = () => {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
+  return "file:../mastra.db";
+};
 const mastra = new Mastra({
   agents: {
     weatherAgent,
     geminiWeatherChatAgent
   },
   storage: new LibSQLStore({
-    url: "file:../mastra.db"
+    url: getDatabaseUrl()
   }),
   logger: createLogger({
     name: "Mastra",

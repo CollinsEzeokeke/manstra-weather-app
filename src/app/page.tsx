@@ -83,6 +83,7 @@ export default function Home() {
   const [showChat, setShowChat] = useState(false);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const forecastScrollRef = useRef<HTMLDivElement>(null);
   
   // Scroll to the bottom of the chat when new messages are added
   useEffect(() => {
@@ -90,6 +91,18 @@ export default function Home() {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages]);
+  
+  // Check for overflow in the forecast scroll area
+  useEffect(() => {
+    if (forecastScrollRef.current) {
+      const hasOverflow = forecastScrollRef.current.scrollWidth > forecastScrollRef.current.clientWidth;
+      if (hasOverflow) {
+        forecastScrollRef.current.classList.add('has-overflow');
+      } else {
+        forecastScrollRef.current.classList.remove('has-overflow');
+      }
+    }
+  }, [weatherData]);
   
   // Pre-generate particles with deterministic values
   const particles = generateParticles();
@@ -537,7 +550,7 @@ export default function Home() {
                     {weatherData.forecast && (
                       <div className="mt-6 bg-gray-800/40 p-4 rounded-lg border border-gray-700/50">
                         <h3 className="text-lg font-semibold text-white mb-3">7-Day Forecast</h3>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto custom-scrollbar pb-2 forecast-scroll" ref={forecastScrollRef}>
                           <div className="flex min-w-max space-x-4">
                             {weatherData.forecast.dates.map((date, index) => {
                               const formattedDate = new Date(date).toLocaleDateString('en-US', { 

@@ -8,6 +8,15 @@ import { weatherTool } from '../tools';
 // Import API keys initialization
 import '@/lib/apiKeys';
 
+// Helper function to get database URL from environment variables or fallback to file
+const getDatabaseUrl = (dbName: string) => {
+  if (process.env.DATABASE_URL) {
+    // Use a URL param to distinguish between different database tables
+    return `${process.env.DATABASE_URL}?prefix=${dbName}`;
+  }
+  return `file:../${dbName}.db`;
+};
+
 // Create a weather agent using Gemini model
 export const weatherAgent = new Agent({
   name: 'Weather Agent',
@@ -35,7 +44,7 @@ export const weatherAgent = new Agent({
   tools: { weatherTool },
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../weather.db', // path is relative to the .mastra/output directory
+      url: getDatabaseUrl('weather'),
     }),
     options: {
       lastMessages: 10,
@@ -86,7 +95,7 @@ export const geminiWeatherChatAgent = new Agent({
   model: google('gemini-1.5-flash'),
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../gemini-weather-chat.db',
+      url: getDatabaseUrl('gemini-weather-chat'),
     }),
     options: {
       lastMessages: 10,

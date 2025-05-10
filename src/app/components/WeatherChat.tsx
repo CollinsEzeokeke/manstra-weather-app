@@ -155,7 +155,7 @@ export default function WeatherChat({ weatherData }: { weatherData?: WeatherData
       </div>
       
       {/* Chat messages with improved styling */}
-      <div className="flex-1 p-5 overflow-y-auto bg-gray-900">
+      <div className="flex-1 p-5 overflow-y-auto bg-gray-900 custom-scrollbar chat-scrollbar">
         <div className="space-y-4">
           {messages.map((message, i) => (
             <div 

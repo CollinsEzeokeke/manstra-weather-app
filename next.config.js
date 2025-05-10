@@ -29,22 +29,18 @@ const nextConfig = {
       use: 'null-loader',
     });
 
-    // Properly exclude native .node files from processing
+    // For server-side only - prevent webpack from attempting to bundle native modules
     if (isServer) {
-      // Prevent webpack from attempting to bundle native modules
+      // Properly exclude native modules from processing
       config.externals = [
         ...(config.externals || []),
         'sqlite3',
         'better-sqlite3',
-        '@libsql/win32-x64-msvc',
-        '@libsql/darwin-arm64',
-        '@libsql/darwin-x64',
-        '@libsql/linux-arm64-gnu',
-        '@libsql/linux-arm64-musl',
-        '@libsql/linux-x64-gnu',
-        '@libsql/linux-x64-musl',
-        'libsql'
+        '@libsql/client',
+        'libsql',
       ];
+      
+      // Remove 'libsql' from externals to ensure it's properly bundled
     }
 
     // This is necessary to tell webpack not to try to bundle .node files
@@ -55,12 +51,21 @@ const nextConfig = {
       '@libsql/hrana-client/LICENSE': false,
     };
 
+    // Add a specific rule for .node binary files
+    config.module.rules.push({
+      test: /\.node$/,
+      use: 'node-loader',
+      exclude: /node_modules/,
+    });
+
     return config;
   },
   // Disable image optimization during development to avoid issues
   images: {
     unoptimized: process.env.NODE_ENV === 'development',
-  }
+  },
+  // Add transpilePackages to ensure proper bundling of native dependencies
+  transpilePackages: ['libsql', '@libsql/client', '@mastra/libsql']
 };
 
 module.exports = nextConfig; 

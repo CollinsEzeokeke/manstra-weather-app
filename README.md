@@ -18,8 +18,9 @@ An intelligent weather application that combines real-time weather data with AI-
 - **TypeScript**: Type-safe JavaScript for improved developer experience
 - **Tailwind CSS**: Utility-first CSS framework for styling
 - **Mastra**: AI agent framework for intelligent responses
-- **OpenAI**: Powers the AI insights and chat functionality
+- **Google Gemini**: Powers the AI insights and chat functionality
 - **Open-Meteo API**: Provides weather data with no API key required
+- **Turso (LibSQL)**: Serverless SQLite database for storage
 
 ## Getting Started
 
@@ -80,16 +81,32 @@ npm run build
 pnpm build
 ```
 
-### Deploying to a Hosting Platform
+### Deploying to Vercel
 
-This application can be deployed to any hosting platform that supports Next.js applications.
-
-#### Vercel (Recommended)
+This application requires specific configuration for successful deployment to Vercel:
 
 1. Push your code to a GitHub, GitLab, or Bitbucket repository
 2. Import your project to [Vercel](https://vercel.com/new)
-3. Let Vercel automatically detect Next.js and set up the build configuration
-4. Deploy!
+3. In the Vercel dashboard under your project's "Settings" > "Environment Variables", add:
+
+   - `DATABASE_URL` - Your Turso database URL (format: `libsql://your-database-url-here`)
+   - `GOOGLE_API_KEY` - Your Google API key for Gemini model access
+   - `WEATHER_API_KEY` - Your weather API key (if required)
+
+4. Deploy your application
+
+#### Setting up a Turso Database
+
+The application uses [Turso](https://turso.tech/) (a serverless SQLite provider) for database storage:
+
+1. Create a Turso account at [turso.tech](https://turso.tech)
+2. Install the Turso CLI: `curl -sSfL https://get.turso.tech | bash`
+3. Login to Turso: `turso auth login`
+4. Create a new database: `turso db create manstra-weather`
+5. Get your database URL: `turso db show --url manstra-weather`
+6. Add this URL to your Vercel environment variables as `DATABASE_URL`
+
+For local development, the app will fall back to file-based SQLite automatically if no `DATABASE_URL` is provided.
 
 #### Custom Domain Setup
 
@@ -98,12 +115,6 @@ This application can be deployed to any hosting platform that supports Next.js a
 3. Add your custom domain
 4. Configure your DNS settings according to the instructions provided by your hosting platform
 5. Wait for DNS propagation (may take up to 48 hours)
-
-#### Environment Variables
-
-When deploying, you'll need to set the following environment variables:
-
-- `OPENAI_API_KEY` - Your OpenAI API key for the AI insights functionality
 
 ## Project Structure
 
@@ -142,9 +153,23 @@ manstra-weather-app/
 - Request Body: `{ location: string, conditions: string, temperature: number, message?: string }`
 - Response: AI-generated insights about the weather conditions
 
-## Notes on Hydration Error Fix
+## Troubleshooting Deployment
 
-The application initially had a hydration error due to the use of `Math.random()` in the animated background. This was fixed by implementing a deterministic particle generator that uses index-based calculations instead of random values.
+### Module not found errors
+
+If you encounter errors like `Cannot find module 'libsql'` when deploying to Vercel, please ensure:
+
+1. The `libsql` package is listed in your `package.json` dependencies
+2. Your `next.config.js` file includes `transpilePackages: ['libsql', '@libsql/client', '@mastra/libsql']`
+3. You've set up the `DATABASE_URL` environment variable in Vercel
+
+### Database connection issues
+
+If you have database connection issues:
+
+1. Check that your Turso database is accessible from Vercel's regions
+2. Verify your database URL has the correct format: `libsql://your-database-url-here`
+3. Ensure your database permissions allow connections from Vercel
 
 ## License
 
@@ -156,3 +181,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Mastra](https://mastra.ai/) for the AI agent framework
 - [Next.js](https://nextjs.org/) for the application framework
 - [Tailwind CSS](https://tailwindcss.com/) for the styling framework
+- [Turso](https://turso.tech/) for serverless SQLite database
